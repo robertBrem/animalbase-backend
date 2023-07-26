@@ -22,7 +22,18 @@ public class AnimalName {
     public Animal animal;
     public String language;
     public String translation;
+    public AnimalName() {
+    }
 
+    public AnimalName(JsonObject json) {
+        try {
+            this.id = json.getJsonNumber(AnimalName.JSON_FIELD_NAMES.ID).longValue();
+        } catch (Exception e) {
+            // ID not set no problemo
+        }
+        this.language = json.getString(JSON_FIELD_NAMES.LANGUAGE, this.language);
+        this.translation = json.getString(JSON_FIELD_NAMES.TRANSLATION, this.translation);
+    }
     public JsonObject toOverviewJson() {
         return getSimpleJsonBuilder()
                 .build();
@@ -31,6 +42,7 @@ public class AnimalName {
     public JsonObjectBuilder getSimpleJsonBuilder() {
         return Json.createObjectBuilder()
                 .add(AnimalName.JSON_FIELD_NAMES.ID, this.id)
+                .add(AnimalName.JSON_FIELD_NAMES.ANIMAL_ID, this.animal.id)
                 .add(AnimalName.JSON_FIELD_NAMES.LANGUAGE, this.language)
                 .add(JSON_FIELD_NAMES.TRANSLATION, this.translation);
     }

@@ -32,15 +32,15 @@ public class Animal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "animal")
-    private List<AnimalName> names = new ArrayList<>();
+    public List<AnimalName> names = new ArrayList<>();
     @Column(nullable = false)
-    private String chipId;
+    public String chipId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "animal")
-    private List<AnimalImage> imagePaths;
+    public List<AnimalImage> imagePaths;
     @Column
-    private LocalDate birthday;
+    public LocalDate birthday;
     @Column
-    private LocalDate acquired;
+    public LocalDate acquired;
 
 
     public Animal() {
@@ -53,11 +53,17 @@ public class Animal {
             // ID not set no problemo
         }
         this.chipId = json.getString(JSON_FIELD_NAMES.CHIP_ID, this.chipId);
+        this.birthday = LocalDate.parse(json.getString(JSON_FIELD_NAMES.BIRTHDAY), DateTimeFormatter.ISO_DATE);
+        this.acquired = LocalDate.parse(json.getString(JSON_FIELD_NAMES.ACQUIRED), DateTimeFormatter.ISO_DATE);
     }
 
     public JsonObject toOverviewJson() {
         return getSimpleJsonBuilder()
-                .add(JSON_FIELD_NAMES.IMAGE_PATHS, this.imagePaths.get(0).path)
+                .add(JSON_FIELD_NAMES.IMAGE_PATHS, this.imagePaths
+                        .stream()
+                        .map(AnimalImage::toOverviewJson)
+                        .collect(JsonCollectors.toJsonArray())
+                )
                 .build();
     }
 
