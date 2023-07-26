@@ -1,0 +1,63 @@
+appName: showcase-keycloak
+
+image:
+  repository: docker.crb.ch/showcase/showcase-keycloak
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+# Environment Variables to be injected
+env:
+
+# Environment Variables containing secrets to be injected
+secrets:
+
+# Kubernetes Configs
+replicaCount: 1
+
+containerPorts:
+  name: http
+  port: 8080
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+
+service:
+  type: ClusterIP
+  externalPort: 80
+  containerPort: http
+
+resources:
+  limits:
+    cpu: 900m
+    memory: 800Mi
+  requests:
+    cpu: 100m
+    memory: 250Mi
+
+# Ingress Rules
+ingress:
+  enabled: true
+  className: ""
+
+# Metrics / Health Checks
+livenessProbe:
+  enabled: true
+  path: /health/live
+  port: 9990
+  initialDelaySeconds: 60
+  periodSeconds: 5
+  timeoutSeconds: 2
+  successThreshold: 1
+  failureThreshold: 20
+readinessProbe:
+  enabled: true
+  path: /health/ready
+  port: 9990
+  initialDelaySeconds: 60
+  periodSeconds: 5
+  timeoutSeconds: 2
+  successThreshold: 1
+  failureThreshold: 20
+

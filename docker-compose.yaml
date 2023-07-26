@@ -1,0 +1,85 @@
+version: '2.1'
+services:
+  keycloak:
+    image: docker.crb.ch/crb-keycloak:latest
+    profiles: ["infra"]
+    container_name: "keycloak"
+    ports:
+      - "8080:8080"
+    environment:
+      KC_HOSTNAME: keycloak
+      KC_HOSTNAME_STRICT: false
+      KC_HTTP_ENABLED: true
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: masterPassword
+      DB_VENDOR: h2
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_PASSWORD: keycloak
+      CRB_API_URL: http://crb-sap-wrapper-mock:1080/api/1.0/user/info
+      CRB_API_EMAIL_URL: http://crb-sap-wrapper-mock:1080/api/1.0/user/email
+      SMTP_FROM_MAIL: keycloak_dev@crb.ch
+      SMTP_FROM_NAME: Keycloak DEV CRB
+      SMTP_REPLY_MAIL: keycloak_dev@crb.ch
+      SMTP_REPLY_NAME: Keycloak DEV CRB
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      SMTP_TLS: false
+      SMTP_STARTTLS: false
+
+  webapp:
+    image: docker.crb.ch/showcase/showcase-keycloak:latest
+    profiles: ["app"]
+    container_name: "showcase-keycloak"
+    ports:
+      - "8090:8080"
+      - "9991:9990"
+      - "5005:5005"
+    environment:
+      - OIDC_PROVIDER_URL=http://keycloak:8080 # or http://host.docker.internal:8080
+      - OIDC_REALM=crb-developer
+      - OIDC_CLIENT=app-be
+      - OIDC_CLIENT_SECRET=the#secret
+      - OIDC_SSL_REQUIRED=external
+      - DS_NAME=DataSourceName
+      - DB_NAME=showcase_keycloak_dev
+      - DB_USER=showcase_keycloak_dev
+      - DB_PASS=db_password
+      - DB_URI=mariadb:3306 # or host.docker.internal:3306
+      # microprofile option
+      - JWT_PROVIDER_URL=http://keycloak:8080
+      - JWT_REALM=crb-developer
+      # Remote debugging Java
+      - JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,address=*:5005,server=y,suspend=n"
+
+  mariadb:
+    image: mariadb:10.8
+    profiles: ["infra"]
+    ports:
+      - 3306:3306
+    volumes:
+      - db-data:/var/lib/mysq
+      - ./sql/test.sql:/docker-entrypoint-initdb.d/test.sql
+    environment:
+      - MYSQL_ROOT_PASSWORD=S3cret
+      - MYSQL_PASSWORD=An0thrS3crt
+      - MYSQL_USER=showcase_keycloak_dev
+      - MYSQL_PASSWORD=db_password
+      - MYSQL_DATABASE=showcase_keycloak_dev
+
+  crb-sap-wrapper-mock:
+    image: docker.crb.ch/crb-sap-wrapper-mock:latest
+    profiles: ["infra"]
+    ports:
+      - 1080:1080
+
+  mailpit:
+    image: 'axllent/mailpit:latest'
+    profiles: ["infra"]
+    container_name: mailpit
+    ports:
+      - '1025:1025' # smpt port
+      - '8025:8025' # webapp port
+
+volumes:
+  db-data:

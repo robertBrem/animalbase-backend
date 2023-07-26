@@ -1,0 +1,10 @@
+{
+    "client-id" : "${env.OIDC_CLIENT}",
+    "provider-url" : "${env.OIDC_PROVIDER_URL}/realms/${env.OIDC_REALM}",
+    "credentials" : {
+        "secret" : "${env.OIDC_CLIENT_SECRET}"
+       },
+    "ssl-required" : "${env.OIDC_SSL_REQUIRED:all}",
+    "principal-attribute" : "preferred_username"
+
+}

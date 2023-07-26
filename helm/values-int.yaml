@@ -1,0 +1,30 @@
+# Environment Variables to be injected
+env:
+  OIDC_PROVIDER_URL: https://showcase-sso.dev.crb.ch
+  OIDC_REALM: crb-developer
+  OIDC_CLIENT: app-be
+  OIDC_SSL_REQUIRED: external
+  DS_NAME: ShowcaseKeycloakDS
+  DB_NAME: showcase_keycloak_int
+  DB_USER: showcase_keycloak_int
+  DB_URI: nonprod-db-cluster01.int.crb.ch:3306
+
+# Environment Variables containing secrets to be injected
+secrets:
+  # When external secrets are used, secret definition is skipped
+  useExternalSecrets: false
+  OIDC_CLIENT_SECRET: "the#secret"
+  DB_PASS: showcase4ever!
+
+# Ingress Rules
+ingress:
+  enabled: true
+  hosts:
+    - host: showcase-keycloak.int.crb.ch
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: tls-int.crb.ch
+      hosts:
+        - showcase-keycloak.int.crb.ch
